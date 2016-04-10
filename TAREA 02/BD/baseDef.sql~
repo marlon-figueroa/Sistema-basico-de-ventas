@@ -1,0 +1,163 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+-- -----------------------------------------------------
+-- Schema pvsql
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema pvsql
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `pvsql` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
+USE `pvsql` ;
+
+-- -----------------------------------------------------
+-- Table `pvsql`.`rol`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `pvsql`.`rol` (
+  `idrol` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idrol`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `pvsql`.`usuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `pvsql`.`usuario` (
+  `idusuario` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  `apellido` VARCHAR(45) NOT NULL,
+  `direccion` VARCHAR(50) NOT NULL,
+  `telefono` INT(8) NOT NULL,
+  `email` VARCHAR(45) NOT NULL,
+  `rol_idrol` INT NOT NULL,
+  PRIMARY KEY (`idusuario`),
+  INDEX `fk_usuario_rol_idx` (`rol_idrol` ASC),
+  CONSTRAINT `fk_usuario_rol`
+    FOREIGN KEY (`rol_idrol`)
+    REFERENCES `pvsql`.`rol` (`idrol`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `pvsql`.`cuenta`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `pvsql`.`cuenta` (
+  `idcuenta` INT NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(45) NOT NULL,
+  `password` VARCHAR(45) NOT NULL,
+  `fecha_acceso` DATE NOT NULL,
+  `usuario_idusuario` INT NOT NULL,
+  PRIMARY KEY (`idcuenta`),
+  INDEX `fk_cuenta_usuario1_idx` (`usuario_idusuario` ASC),
+  CONSTRAINT `fk_cuenta_usuario1`
+    FOREIGN KEY (`usuario_idusuario`)
+    REFERENCES `pvsql`.`usuario` (`idusuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `pvsql`.`marca`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `pvsql`.`marca` (
+  `idmarca` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idmarca`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `pvsql`.`categoria`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `pvsql`.`categoria` (
+  `idcategoria` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NULL,
+  PRIMARY KEY (`idcategoria`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `pvsql`.`producto`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `pvsql`.`producto` (
+  `idproducto` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  `precio_uni` DECIMAL(18,2) NOT NULL,
+  `fecha_venci` DATE NOT NULL,
+  `marca_idmarca` INT NOT NULL,
+  `categoria_idcategoria` INT NOT NULL,
+  `usuario_idusuario` INT NOT NULL,
+  PRIMARY KEY (`idproducto`),
+  INDEX `fk_producto_marca1_idx` (`marca_idmarca` ASC),
+  INDEX `fk_producto_categoria1_idx` (`categoria_idcategoria` ASC),
+  INDEX `fk_producto_usuario1_idx` (`usuario_idusuario` ASC),
+  CONSTRAINT `fk_producto_marca1`
+    FOREIGN KEY (`marca_idmarca`)
+    REFERENCES `pvsql`.`marca` (`idmarca`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_producto_categoria1`
+    FOREIGN KEY (`categoria_idcategoria`)
+    REFERENCES `pvsql`.`categoria` (`idcategoria`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_producto_usuario1`
+    FOREIGN KEY (`usuario_idusuario`)
+    REFERENCES `pvsql`.`usuario` (`idusuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `pvsql`.`venta`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `pvsql`.`venta` (
+  `idventa` INT NOT NULL AUTO_INCREMENT,
+  `fecha_venta` DATETIME NOT NULL,
+  `usuario_idusuario` INT NOT NULL,
+  PRIMARY KEY (`idventa`),
+  INDEX `fk_venta_usuario1_idx` (`usuario_idusuario` ASC),
+  CONSTRAINT `fk_venta_usuario1`
+    FOREIGN KEY (`usuario_idusuario`)
+    REFERENCES `pvsql`.`usuario` (`idusuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `pvsql`.`detalle_venta`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `pvsql`.`detalle_venta` (
+  `iddetalleventa` INT NOT NULL AUTO_INCREMENT,
+  `producto_idproducto` INT NOT NULL,
+  `venta_idventa` INT NOT NULL,
+  `cantidad` DECIMAL(18,2) NOT NULL,
+  `precio_venta` DECIMAL(18,2) NOT NULL,
+  PRIMARY KEY (`iddetalleventa`),
+  INDEX `fk_detalle_venta_venta1_idx` (`venta_idventa` ASC),
+  CONSTRAINT `fk_detalle_venta_producto1`
+    FOREIGN KEY (`producto_idproducto`)
+    REFERENCES `pvsql`.`producto` (`idproducto`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_detalle_venta_venta1`
+    FOREIGN KEY (`venta_idventa`)
+    REFERENCES `pvsql`.`venta` (`idventa`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
